@@ -6,6 +6,7 @@ import schedule
 import time
 import yaml
 import logging
+import argparse
 
 from PyQt5.QtCore import Qt, QUrl, QRect, QTimer
 from PyQt5.QtGui import QIcon
@@ -126,9 +127,9 @@ def create_event(parent, settings):
 class frame(QMainWindow):
     """Create the main window that stores all of the widgets necessary for the application."""
 
-    def __init__(self, parent=None):
+    def __init__(self, args):
         """Initialize the components of the main window."""
-        super(frame, self).__init__(parent)
+        super(frame, self).__init__(None)
         self.resize(1024, 768)
         self.setWindowTitle('Event Manager')
         window_icon = pkg_resources.resource_filename('frame.images',
@@ -143,13 +144,13 @@ class frame(QMainWindow):
         self.timer.start(1000)
 
         self.events = []
-        self.load_events()
+        self.load_events(args.settings_yaml)
 
         for e in self.events:
             e.start()
 
-    def load_events(self):
-        settings_file = open(os.path.join(os.path.split(__file__)[0], 'settings.yaml'), 'r')
+    def load_events(self, path):
+        settings_file = open(path, 'r')
 
         try:
             from yaml import Loader, Dumper
@@ -196,11 +197,15 @@ if __name__ == '__main__':
     sys.exit(app.exec_())
 
 def main():
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('settings_yaml', help='Path to a yaml file with settings')
+    args = parser.parse_args()
+
     logging.root.setLevel(logging.DEBUG)
 
     application = QApplication(sys.argv)
 
-    window = frame()
+    window = frame(args)
     window.move(200, 200)
     window.show()
     
