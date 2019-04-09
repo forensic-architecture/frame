@@ -1,0 +1,6 @@
+events:
+  atlanta:
+    name: Atlanta
+    type: PlayVideo
+    schedule: every().day.at("12:02:55")
+    url: file:///Users/fsc/Downloads/ATL.202.proper.x264-BvS/Atlanta.S02E02.PROPER.HDTV.x264-BvS.mp4
