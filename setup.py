@@ -1,7 +1,9 @@
 from setuptools import setup
 
 requirements = [
-    # TODO: put your package requirements here
+    'PyQt5==5.12.1',
+    'PyYAML==5.1',
+    'schedule==0.6.0'
 ]
 
 test_requirements = [
