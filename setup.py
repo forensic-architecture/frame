@@ -1,7 +1,8 @@
 from setuptools import setup
 
 requirements = [
-    'PyQt5==5.12.1',
+    'pyqt5-sip',
+    'PyQt5',
     'PyYAML==5.1',
     'schedule==0.6.0'
 ]
