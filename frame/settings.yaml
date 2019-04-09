@@ -1,6 +1,8 @@
 events:
-  atlanta:
-    name: Atlanta
+  test_video:
+    name: Test
     type: PlayVideo
+    # schedule string follows syntax of https://github.com/dbader/schedule
     schedule: every().day.at("12:02:55")
-    url: file:///Users/fsc/Downloads/ATL.202.proper.x264-BvS/Atlanta.S02E02.PROPER.HDTV.x264-BvS.mp4
+    # schedule: every(3).minutes
+    url: file:///Users/fsc/Desktop/video.mp4
