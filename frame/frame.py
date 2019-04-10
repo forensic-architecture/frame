@@ -9,14 +9,15 @@ import logging
 import argparse
 
 from PyQt5.QtCore import Qt, QUrl, QRect, QTimer
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QColor, QPalette
 from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QDialog, QFileDialog,
-                             QHBoxLayout, QLabel, QMainWindow, QToolBar, QVBoxLayout, QWidget, QPushButton)
+                             QHBoxLayout, QLabel, QMainWindow, QToolBar, QVBoxLayout, QWidget, QPushButton, QStackedWidget)
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaPlaylist, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 
+
 def string_to_job(schedule_str):
-    schedule_str = 'schedule.' + str(schedule_str) + '.do(lambda t: print())'
+    schedule_str = 'schedule.' + str(schedule_str) + '.do(lambda: print())'
     try:
         return eval(schedule_str)
     except Exception:
@@ -25,9 +26,22 @@ def string_to_job(schedule_str):
         logging.error(traceback.format_exc())
         return None
 
+def protect(self, func, *args, **kwargs):
+    try:
+        func()
+        return True
+    except Exception:
+        import traceback
+        self.logging.error(traceback.format_exc())
+        if self.cancel_on_error:
+            self.cancel()
+        return False
+
+
 class Event:
     def __init__(self, settings):
         self.running = False
+        self.logging = logging
         self.name = settings.get('name')
         self.tags = settings.get('tags', [])
         self.type = settings.get('type')
@@ -36,53 +50,137 @@ class Event:
 
         if self.tags:
             self.job.tags(*self.tags)
-    
-    def start(self):
-        if self.running:
+
+        self.job.do(self.run)
+
+        self.state = 'uninitialized'
+
+    def initialize(self):
+        logging.debug("Initializing task %s" % (self.name))
+        if self.state == 'uninitialized':
+            if protect(self, self.do_initialize):
+                self.state = 'initialized'
+        if self.state == 'playing':
             self.stop()
 
-        self.running = True
-        self.on_start()
-        self.job.do(self.safe_run)
-
-    def stop(self):
-        self.on_stop()
-
-    def cancel(self):
-        schedule.cancel_job(self.job)
-        self.running = False
-        self.on_cancel()
-
-    def safe_run(self):
-        logging.debug("Running task %s" % (self.name))
-        try:
-            return self.run()
-        except:
-            import traceback
-            logging.error(traceback.format_exc())
-            if self.cancel_on_error:
-                self.cancel()
-
-    def run(self):
+    def do_initialize(self):
         pass
 
-class PlayVideo(Event):
-    def __init__(self, parent, settings):
-        super().__init__(settings)
+    def run(self):
+        logging.debug("Starting task %s" % (self.name))
+        if self.state == 'uninitialized':
+            self.initialize()
+        if self.state == 'running':
+            self.stop()
+        if self.state == 'initialized':
+            if protect(self, self.do_run):
+                self.state = 'running'
 
-        self.url = QUrl(settings.get('url'))
-        self.start_time = settings.get('start', 0)
-        self.end_time = settings.get('end')
-        self.loop = settings.get('loop', True)
+    def do_run(self):
+        pass
+
+    def stop(self):
+        logging.debug("Stopping task %s" % (self.name))
+        if self.state == 'running':
+            if protect(self, self.do_stop):
+                self.state = 'initialized'
+ 
+    def do_stop(self):
+        pass
+
+    def reset(self):
+        self.stop()
+        if protect(self, self.do_reset):
+            self.state = 'uninitialized'
+
+    def do_reset(self):
+        pass
+
+    def cancel(self):
+        self.reset()
+        self.state = 'cancelled'
+
+class DisplayEvent(Event):
+    def __init__(self, frame, settings):
+        super().__init__(settings)
+        self.frame = frame
+        self.widget = frame.create_widget()
+        self.widget.setLayout(QVBoxLayout())
+        self.widget.layout().setContentsMargins(0, 0, 0, 0)
+        self.widget.layout().setSpacing(0)
+
         self.fullscreen = settings.get('fullscreen', True)
-        self.geometry = settings.get('geometry', [0, 0, 100, 100])
-        self.volume = settings.get('volume', 100)
-        self.playbackRate = settings.get('playbackRate', 1.0)
+        self.geometry = settings.get('geometry')
 
         if (self.geometry):
             self.geometry = QRect(self.geometry[0], self.geometry[1], self.geometry[2], self.geometry[3])
 
-        self.video = QVideoWidget(parent)
+    def add_widget(self, widget):
+        if self.geometry:
+            widget.setParent(self.widget)
+            widget.setGeometry(self.geometry)
+        else:
+            self.widget.layout().addWidget(widget)
+
+    def run(self):
+        self.widget.show()
+        self.frame.push(self.widget)
+        super().run()
+
+    def stop(self):
+        self.frame.pop(self.widget)
+        super().stop()
+
+class Frame(QStackedWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.null = QWidget()
+        self.stack = [self.null]
+        self.addWidget(self.null)
+        self.set_current()
+        self.autoFillBackground()
+
+        palette = self.palette()
+        palette.setColor(QPalette.Background, QColor(0, 0, 0))
+        self.setPalette(palette)
+
+        self.setGeometry(QRect(0, 0, 400, 400))
+        self.showFullScreen()
+
+    def create_widget(self):
+        widget = QWidget()
+        self.addWidget(widget)
+        return widget
+
+    def push(self, widget):
+        self.stack.append(widget)
+        self.set_current()
+
+    def pop(self, widget):
+        try:
+            self.stack.remove(widget)
+        except Exception:
+            pass
+        self.set_current()
+
+    def set_current(self):
+        self.setCurrentWidget(self.stack[-1])
+
+class PlayVideo(DisplayEvent):
+    def __init__(self, frame, settings):
+        super().__init__(frame, settings)
+
+        self.url = QUrl(settings.get('url'))
+        self.start_time = settings.get('start', 0) * 1000
+        self.duration = settings.get('duration')
+        self.loop = settings.get('loop', True)
+        self.volume = settings.get('volume', 100)
+        self.playback_rate = settings.get('playbackRate', 1.0)
+
+    def do_initialize(self):
+        self.video = QVideoWidget()
+        self.add_widget(self.video)
+        self.video.show()
 
         self.media = QMediaContent(self.url)
         self.playlist = QMediaPlaylist(self.video)
@@ -92,26 +190,15 @@ class PlayVideo(Event):
         self.player = QMediaPlayer()
         self.player.setVideoOutput(self.video)
         self.player.setVolume(self.volume)
-        self.player.setPlaybackRate(self.playbackRate)
+        self.player.setPlaybackRate(self.playback_rate)
     
-    def on_start(self):
-        pass
-
-    def on_stop(self):
-        self.video.hide()
-        self.player.stop()
-
-    def run(self):
-        self.video.move(self.geometry.left(), self.geometry.top())
-        self.video.resize(self.geometry.width(), self.geometry.height())
-
-        if self.fullscreen:
-            self.video.setFullScreen(True)
-
+    def do_run(self):
         self.player.setPlaylist(self.playlist)
         self.player.setPosition(self.start_time)
-        self.video.show()
         self.player.play()
+
+    def do_stop(self):
+        self.player.stop()
 
 def create_event(parent, settings):
     event_types = {
@@ -120,81 +207,32 @@ def create_event(parent, settings):
     logging.info("Creating an event: " + str(settings))
     event_class = event_types.get(settings.get('type'))
     event = event_class(parent, settings)
-    event.start()
     return event
 
-    
-class frame(QMainWindow):
-    """Create the main window that stores all of the widgets necessary for the application."""
+def load_events(path, events_list):
+    settings_file = open(path, 'r')
 
-    def __init__(self, args):
-        """Initialize the components of the main window."""
-        super(frame, self).__init__(None)
-        self.resize(1024, 768)
-        self.setWindowTitle('Event Manager')
-        window_icon = pkg_resources.resource_filename('frame.images',
-                                                      'ic_insert_drive_file_black_48dp_1x.png')
-        self.setWindowIcon(QIcon(window_icon))
+    try:
+        from yaml import Loader, Dumper
+        import yaml
+        settings = yaml.load(settings_file, Loader=Loader)
+        logging.info("Loaded settings: " + str(settings))
+    except ImportError:
+        import traceback
+        logging.error(traceback.format_exc())
+        return
 
-        self.menu_bar = self.menuBar()
-        self.file_menu()
+    events = settings.get('events')
+    frame = Frame(None)
+    for name, event in events.items():
+        event['name'] = name
+        events_list.append(
+            create_event(frame, event)
+        )
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.tick)
-        self.timer.start(1000)
-
-        self.events = []
-        self.load_events(args.settings_yaml)
-
-        for e in self.events:
-            e.start()
-
-    def load_events(self, path):
-        settings_file = open(path, 'r')
-
-        try:
-            from yaml import Loader, Dumper
-            import yaml
-            self.settings = yaml.load(settings_file, Loader=Loader)
-            logging.info("Loaded settings: " + str(self.settings))
-        except ImportError:
-            import traceback
-            logging.error(traceback.format_exc())
-            return
-
-        events = self.settings.get('events')
-        for name, event in events.items():
-            event['name'] = name
-            self.events.append(
-                create_event(self, event)
-            )
-
-    def tick(self):
-        logging.info("Tick")
-        schedule.run_pending()
-
-    def stop_all(self):
-        for e in self.events:
-            e.cancel()
-    
-    def file_menu(self):
-        """Create a file submenu with an Open File item that opens a file dialog."""
-        self.file_sub_menu = self.menu_bar.addMenu('File')
-
-        self.play_action = QAction("Stop All", self)
-        self.play_action.triggered.connect(self.stop_all)
-
-        self.exit_action = QAction('Exit Application', self)
-        self.exit_action.setStatusTip('Exit the application.')
-        self.exit_action.setShortcut('CTRL+Q')
-        self.exit_action.triggered.connect(lambda: QApplication.quit())
-
-        self.file_sub_menu.addAction(self.exit_action)
-        self.file_sub_menu.addAction(self.play_action)
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    sys.exit(app.exec_())
+def tick():
+    logging.info("Tick")
+    schedule.run_pending()
 
 def main():
     parser = argparse.ArgumentParser(description='')
@@ -205,10 +243,17 @@ def main():
 
     application = QApplication(sys.argv)
 
-    window = frame(args)
-    window.move(200, 200)
-    window.show()
-    
+    timer = QTimer()
+    timer.timeout.connect(tick)
+    timer.start(1000)
 
+    events = []
+    load_events(args.settings_yaml, events)
+
+    for e in events:
+        e.initialize()
 
     sys.exit(application.exec_())
+
+if __name__ == '__main__':
+    main()
