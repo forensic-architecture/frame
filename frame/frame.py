@@ -152,13 +152,17 @@ class Frame(QStackedWidget):
         self.null = QWidget()
         self.stack = [self.null]
         self.addWidget(self.null)
-        self.set_current()
 
-        self.autoFillBackground()
-        self.background_color = settings.get('background_color', [0, 0, 0, 0])
-        self.background_color = QColor(*self.background_color)
+        self.setAutoFillBackground(True)
+        self.background_color = settings.get('background_color', [0.0, 0.0, 0.0])
+        self.background_color = QColor(
+            self.background_color[0] * 255, 
+            self.background_color[1] * 255, 
+            self.background_color[2] * 255,
+            255)
         self.set_background_color(self.background_color)
 
+        self.set_current()
         self.showFullScreen()
 
     def set_background_color(self, color):
