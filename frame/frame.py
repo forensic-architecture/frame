@@ -40,6 +40,7 @@ class Event:
 
         self.tags = settings.get('tags', [])
         self.type = settings.get('type')
+        self.schedule_string = settings.get('schedule')
         self.job = string_to_job(settings.get('schedule'))
         self.cancel_on_error = settings.get('cancel_on_error', False)
 
