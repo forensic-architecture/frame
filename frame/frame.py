@@ -19,7 +19,7 @@ app_logging = logging.getLogger('frame')
 event_logging = logging.getLogger('frame.event')
 
 def string_to_job(schedule_str):
-    schedule_str = 'schedule.' + str(schedule_str) + '.do(lambda: print())'
+    schedule_str = 'schedule.' + str(schedule_str) + ''
     try:
         return eval(schedule_str)
     except Exception:
