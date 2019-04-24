@@ -5,7 +5,7 @@ import os.path
 import schedule
 import time
 import yaml
-import logging
+import logging, logging.handlers
 import argparse
 
 from PyQt5.QtCore import Qt, QUrl, QRect, QTimer
@@ -15,6 +15,8 @@ from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QDialog, QFi
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaPlaylist, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 
+app_logging = logging.getLogger('frame')
+event_logging = logging.getLogger('frame.event')
 
 def string_to_job(schedule_str):
     schedule_str = 'schedule.' + str(schedule_str) + '.do(lambda: print())'
@@ -41,8 +43,10 @@ def protect(self, func, *args, **kwargs):
 class Event:
     def __init__(self, settings):
         self.running = False
-        self.logging = logging
+        self.__init_logging__(settings)
         self.name = settings.get('name')
+        self.logging.debug(("Creating event %s: " % self.name) + str(settings))
+
         self.tags = settings.get('tags', [])
         self.type = settings.get('type')
         self.job = string_to_job(settings.get('schedule'))
@@ -54,6 +58,8 @@ class Event:
         self.job.do(self.run)
 
         self.state = 'uninitialized'
+    def __init_logging__(self, settings):
+        self.logging = logging.getLogger('frame.event.%s' % str(settings.get('name')))
 
     def initialize(self):
         logging.debug("Initializing task %s" % (self.name))
@@ -204,7 +210,6 @@ def create_event(parent, settings):
     event_types = {
         'PlayVideo': PlayVideo
     }
-    logging.info("Creating an event: " + str(settings))
     event_class = event_types.get(settings.get('type'))
     event = event_class(parent, settings)
     return event
@@ -231,7 +236,7 @@ def load_events(path, events_list):
         )
 
 def tick():
-    logging.info("Tick")
+    event_logging.info("Tick")
     schedule.run_pending()
 
 def main():
@@ -240,6 +245,7 @@ def main():
     args = parser.parse_args()
 
     logging.root.setLevel(logging.DEBUG)
+    event_logging.setLevel(logging.DEBUG)
 
     application = QApplication(sys.argv)
 
