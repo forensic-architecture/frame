@@ -147,20 +147,24 @@ class DisplayEvent(Event):
         self.frame.pop(self.widget)
 
 class Frame(QStackedWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, settings):
         super().__init__(parent)
         self.null = QWidget()
         self.stack = [self.null]
         self.addWidget(self.null)
         self.set_current()
+
         self.autoFillBackground()
+        self.background_color = settings.get('background_color', [0, 0, 0, 0])
+        self.background_color = QColor(*self.background_color)
+        self.set_background_color(self.background_color)
 
-        palette = self.palette()
-        palette.setColor(QPalette.Background, QColor(0, 0, 0))
-        self.setPalette(palette)
-
-        self.setGeometry(QRect(0, 0, 400, 400))
         self.showFullScreen()
+
+    def set_background_color(self, color):
+        palette = self.palette()
+        palette.setColor(QPalette.Background, self.background_color)
+        self.setPalette(palette)
 
     def create_widget(self):
         widget = QWidget()
@@ -240,7 +244,7 @@ def load_events(path, events_list):
         return
 
     events = settings.get('events')
-    frame = Frame(None)
+    frame = Frame(None, settings)
     for name, event in events.items():
         event['name'] = name
         events_list.append(
