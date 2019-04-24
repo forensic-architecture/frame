@@ -2,7 +2,14 @@ events:
   test_video:
     name: Test
     type: PlayVideo
-    # schedule string follows syntax of https://github.com/dbader/schedule
-    schedule: every().day.at("12:02:55")
-    # schedule: every(3).minutes
-    url: file:///Users/fsc/Desktop/video.mp4
+    schedule: every(16).seconds
+    start: 0
+    fullscreen: false
+    geometry: [100, 100, 300, 300]
+    url: file:///Users/fsc/Downloads/jsjsjs.mp4
+  test_video2:
+    name:: Neden02
+    type: PlayVideo
+    schedule: every(7).seconds
+    start: 40
+    url: file:///Users/fsc/Downloads/jsjsjs.mp4
