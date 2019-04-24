@@ -28,22 +28,10 @@ def string_to_job(schedule_str):
         logging.error(traceback.format_exc())
         return None
 
-def protect(self, func, *args, **kwargs):
-    try:
-        func()
-        return True
-    except Exception:
-        import traceback
-        self.logging.error(traceback.format_exc())
-        if self.cancel_on_error:
-            self.cancel()
-        return False
-
-
 class Event:
     def __init__(self, settings):
-        self.running = False
         self.__init_logging__(settings)
+
         self.name = settings.get('name')
         self.logging.debug(("Creating event %s: " % self.name) + str(settings))
 
@@ -57,54 +45,77 @@ class Event:
 
         self.job.do(self.run)
 
-        self.state = 'uninitialized'
+        self.__state = 'uninitialized'
+
     def __init_logging__(self, settings):
         self.logging = logging.getLogger('frame.event.%s' % str(settings.get('name')))
+    
+    def protect(self, func, *args, **kwargs):
+        try:
+            self.logging.debug("Running '%s.%s()'" % (
+                self.__class__.__name__,
+                func.__name__
+            ))
+            func()
+            return True
+        except Exception:
+            import traceback
+            self.logging.error(traceback.format_exc())
+            if self.cancel_on_error:
+                self.cancel()
+            return False
+
+    @property
+    def state(self):
+        return self.__state
+
+    @state.setter
+    def state(self, value):
+        if (self.__state != value):
+            self.logging.debug('Changed from %s -> %s' % (self.__state, value))
+            self.__state = value
 
     def initialize(self):
-        logging.debug("Initializing task %s" % (self.name))
         if self.state == 'uninitialized':
-            if protect(self, self.do_initialize):
+            if self.protect(self.do_initialize):
                 self.state = 'initialized'
-        if self.state == 'playing':
+        elif self.state == 'playing':
             self.stop()
 
-    def do_initialize(self):
-        pass
-
     def run(self):
-        logging.debug("Starting task %s" % (self.name))
         if self.state == 'uninitialized':
             self.initialize()
         if self.state == 'running':
             self.stop()
         if self.state == 'initialized':
-            if protect(self, self.do_run):
+            if self.protect(self.do_run):
                 self.state = 'running'
 
-    def do_run(self):
-        pass
-
     def stop(self):
-        logging.debug("Stopping task %s" % (self.name))
         if self.state == 'running':
-            if protect(self, self.do_stop):
+            if self.protect(self.do_stop):
                 self.state = 'initialized'
  
-    def do_stop(self):
-        pass
-
     def reset(self):
         self.stop()
-        if protect(self, self.do_reset):
+        if self.protect(self.do_reset):
             self.state = 'uninitialized'
-
-    def do_reset(self):
-        pass
 
     def cancel(self):
         self.reset()
         self.state = 'cancelled'
+
+    def do_initialize(self):
+        pass
+
+    def do_run(self):
+        pass
+
+    def do_stop(self):
+        pass
+
+    def do_reset(self):
+        pass
 
 class DisplayEvent(Event):
     def __init__(self, frame, settings):
@@ -128,14 +139,12 @@ class DisplayEvent(Event):
         else:
             self.widget.layout().addWidget(widget)
 
-    def run(self):
+    def do_run(self):
         self.widget.show()
         self.frame.push(self.widget)
-        super().run()
 
-    def stop(self):
+    def do_stop(self):
         self.frame.pop(self.widget)
-        super().stop()
 
 class Frame(QStackedWidget):
     def __init__(self, parent):
@@ -184,6 +193,7 @@ class PlayVideo(DisplayEvent):
         self.playback_rate = settings.get('playbackRate', 1.0)
 
     def do_initialize(self):
+        super().do_initialize()
         self.video = QVideoWidget()
         self.add_widget(self.video)
         self.video.show()
@@ -199,11 +209,13 @@ class PlayVideo(DisplayEvent):
         self.player.setPlaybackRate(self.playback_rate)
     
     def do_run(self):
+        super().do_run()
         self.player.setPlaylist(self.playlist)
         self.player.setPosition(self.start_time)
         self.player.play()
 
     def do_stop(self):
+        super().do_stop()
         self.player.stop()
 
 def create_event(parent, settings):
