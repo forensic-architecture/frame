@@ -4,7 +4,8 @@ requirements = [
     'pyqt5-sip',
     'PyQt5',
     'PyYAML==5.1',
-    'schedule==0.6.0'
+    'schedule==0.6.0',
+    'tornado>=6.0'
 ]
 
 test_requirements = [
@@ -24,7 +25,7 @@ setup(
     author_email='scott@artificia.org',
     url='https://github.com/scztt/frame',
     packages=['frame', 'frame.images',
-              'frame.tests'],
+              'frame.tests', 'frame.server'],
     package_data={'frame.images': ['*.png']},
     entry_points={
         'console_scripts': [

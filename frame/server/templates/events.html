@@ -1,0 +1,39 @@
+{% extends "index.html" %}
+
+{% block body %}
+	<h2>Events</h2>
+	<ul class="list-group list-group-flush"></ul>
+	<script>
+		var source = new EventSource("/events/log");
+		source.onmessage = function(event) {
+			event = JSON.parse(event.data);
+			element = document.getElementById(event.name);
+			if (!element) {
+				element = document.getElementById("all_log");
+			}
+
+			element.innerHTML += `<b>[${event.level}] ${event.time}</b> ${event.message}<br>`;
+			element.parentNode.scrollTop = element.parentNode.scrollHeight;
+		};
+	</script>
+	{% if events %}
+		{% for event in events %}
+		<li class="list-group-item">
+			<ul class="list-group-item active"><b>{{ event.name }}</b></ul>
+			<ul class="list-group">
+				<li class="list-group-item"><b>Name:</b> {{ event.name }}</li>
+				<li class="list-group-item"><b>State:</b> {{ event.state }}</li>
+				<li class="list-group-item"><b>Schedule:</b> {{ event.schedule_string }}</li>
+				<li class="list-group-item" style="overflow-y: scroll; height: 160px; background-color: rgb(240, 240, 240);">
+					<div class="log" id="frame.event.{{event.name}}"></div>
+				</li>
+			</ul>
+		</li>
+		{% end %}
+	{% end %}
+	<p></p>
+	<h2>Log</h3>
+	<div class="list-group-item log"  style="overflow-y: scroll; height: 160px; background-color: rgb(240, 240, 240);" id="all_log">
+	</div>
+
+{% end %}

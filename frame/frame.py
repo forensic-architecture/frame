@@ -7,6 +7,9 @@ import time
 import yaml
 import logging, logging.handlers
 import argparse
+import server
+
+from queue import Queue
 
 from PyQt5.QtCore import Qt, QUrl, QRect, QTimer
 from PyQt5.QtGui import QIcon, QColor, QPalette
@@ -267,14 +270,21 @@ def main():
     logging.root.setLevel(logging.DEBUG)
     event_logging.setLevel(logging.DEBUG)
 
+    event_logging_queue = Queue()  # no limit on size
+    event_logging_handler = logging.handlers.QueueHandler(event_logging_queue)
+    event_logging.addHandler(event_logging_handler)
+
+    events = []
+
+    app = server.run_server(event_logging_queue, events)
+
     application = QApplication(sys.argv)
+
+    load_events(args.settings_yaml, events)
 
     timer = QTimer()
     timer.timeout.connect(tick)
     timer.start(1000)
-
-    events = []
-    load_events(args.settings_yaml, events)
 
     for e in events:
         e.initialize()
