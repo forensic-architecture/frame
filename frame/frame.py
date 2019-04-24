@@ -7,7 +7,7 @@ import time
 import yaml
 import logging, logging.handlers
 import argparse
-import server
+from . import server
 
 from queue import Queue
 
