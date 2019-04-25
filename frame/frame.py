@@ -43,11 +43,11 @@ class Event:
         self.schedule_string = settings.get('schedule')
         self.job = string_to_job(settings.get('schedule'))
         self.cancel_on_error = settings.get('cancel_on_error', False)
-
-        if self.tags:
-            self.job.tags(*self.tags)
-
-        self.job.do(self.run)
+        
+        if self.job:
+            if self.tags:
+                self.job.tags(*self.tags)
+            self.job.do(self.run)
 
         self.__state = 'uninitialized'
 
