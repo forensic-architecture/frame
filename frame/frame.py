@@ -109,6 +109,10 @@ class Event:
         self.reset()
         self.state = 'cancelled'
 
+    def tick(self):
+        if self.state == 'running':
+            self.do_tick()
+
     def do_initialize(self):
         pass
 
@@ -119,6 +123,9 @@ class Event:
         pass
 
     def do_reset(self):
+        pass
+
+    def do_tick(self):
         pass
 
 class DisplayEvent(Event):
@@ -204,9 +211,21 @@ class PlayVideo(DisplayEvent):
         self.volume = settings.get('volume', 100)
         self.playback_rate = settings.get('playbackRate', 1.0)
 
+    def do_tick(self):
+        if self.player:
+            self.logging.info("position: %s/%s status: %s error: %s" % (
+                self.player.position(),
+                self.player.duration(),
+                self.player.mediaStatus(),
+                self.player.errorString()
+            ))
+            if self.player.errorString():
+                self.logging.error(self.player.errorString())
+                self.cancel()
+
     def do_initialize(self):
         super().do_initialize()
-        self.video = QVideoWidget()
+        self.video = QVideoWidget(self.widget)
         self.add_widget(self.video)
         self.video.show()
 
@@ -215,7 +234,7 @@ class PlayVideo(DisplayEvent):
         self.playlist.addMedia(self.media)
         self.playlist.setPlaybackMode(QMediaPlaylist.Loop if self.loop else QMediaPlaylist.Sequential)
 
-        self.player = QMediaPlayer()
+        self.player = QMediaPlayer(self.widget)
         self.player.setVideoOutput(self.video)
         self.player.setVolume(self.volume)
         self.player.setPlaybackRate(self.playback_rate)
@@ -225,6 +244,10 @@ class PlayVideo(DisplayEvent):
         self.player.setPlaylist(self.playlist)
         self.player.setPosition(self.start_time)
         self.player.play()
+
+        if self.player.errorString():
+            self.logging.error(self.player.errorString())
+            self.cancel()
 
     def do_stop(self):
         super().do_stop()
@@ -259,9 +282,11 @@ def load_events(path, events_list):
             create_event(frame, event)
         )
 
-def tick():
+def tick(events):
     event_logging.info("Tick")
     schedule.run_pending()
+    for event in events:
+        event.tick()
 
 def main():
     parser = argparse.ArgumentParser(description='')
@@ -284,7 +309,7 @@ def main():
     load_events(args.settings_yaml, events)
 
     timer = QTimer()
-    timer.timeout.connect(tick)
+    timer.timeout.connect(lambda: tick(events))
     timer.start(1000)
 
     for e in events:
