@@ -253,6 +253,10 @@ class PlayVideo(DisplayEvent):
         super().do_stop()
         self.player.stop()
 
+    def do_reset(self):
+        self.player = None
+        self.video = None
+
 def create_event(parent, settings):
     event_types = {
         'PlayVideo': PlayVideo
