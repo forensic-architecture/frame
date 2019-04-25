@@ -1,5 +1,5 @@
 import os.path
-import logging 
+import logging
 import json
 import datetime
 import asyncio
@@ -16,9 +16,9 @@ event_logging_listener = None
 
 class Server(tornado.web.Application):
     def __init__(self, event_list, event_logging_listener):
-        handlers = [ 
-            (r"/events", Events, dict(event_list=event_list)), 
-            (r"/events/{name}", Events, dict(event_list=event_list)), 
+        handlers = [
+            (r"/events", Events, dict(event_list=event_list)),
+            (r"/events/{name}", Events, dict(event_list=event_list)),
             (r'/events/log', EventsLog, dict(listener=event_logging_listener))
         ]
         settings = {'debug': True}
@@ -47,7 +47,7 @@ class Events(tornado.web.RequestHandler):
             self.write(page)
         else:
             self.write('')
-    
+
 class EventsLog(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ["GET"]
 
@@ -103,5 +103,5 @@ def run_server(event_logging_queue, event_list):
     t = Thread(target=start_server, args=())
     t.daemon = True
     t.start()
-    
+
     return {}

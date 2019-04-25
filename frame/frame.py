@@ -43,7 +43,7 @@ class Event:
         self.schedule_string = settings.get('schedule')
         self.job = string_to_job(settings.get('schedule'))
         self.cancel_on_error = settings.get('cancel_on_error', False)
-        
+
         if self.job:
             if self.tags:
                 self.job.tags(*self.tags)
@@ -53,7 +53,7 @@ class Event:
 
     def __init_logging__(self, settings):
         self.logging = logging.getLogger('frame.event.%s' % str(settings.get('name')))
-    
+
     def protect(self, func, *args, **kwargs):
         try:
             self.logging.debug("Running '%s.%s()'" % (
@@ -99,7 +99,7 @@ class Event:
         if self.state == 'running':
             if self.protect(self.do_stop):
                 self.state = 'initialized'
- 
+
     def reset(self):
         self.stop()
         if self.protect(self.do_reset):
@@ -167,8 +167,8 @@ class Frame(QStackedWidget):
         self.setAutoFillBackground(True)
         self.background_color = settings.get('background_color', [0.0, 0.0, 0.0])
         self.background_color = QColor(
-            self.background_color[0] * 255, 
-            self.background_color[1] * 255, 
+            self.background_color[0] * 255,
+            self.background_color[1] * 255,
             self.background_color[2] * 255,
             255)
         self.set_background_color(self.background_color)
@@ -238,7 +238,7 @@ class PlayVideo(DisplayEvent):
         self.player.setVideoOutput(self.video)
         self.player.setVolume(self.volume)
         self.player.setPlaybackRate(self.playback_rate)
-    
+
     def do_run(self):
         super().do_run()
         self.player.setPlaylist(self.playlist)
