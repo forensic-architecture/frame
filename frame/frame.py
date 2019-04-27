@@ -327,17 +327,18 @@ def load_events(path, events_list):
         events_list.append(e)
 
     initial = settings.get("initial")
-    first = create_event(frame, initial)
-    # NOTE: this double initialize is necessary to set appropriately at both the
-    # Event level and at the PlayVideo level. It's a hack to create an Event that
-    # bypasses initialization via schedule, but retains the lifecycle etc.
-    first.initialize()
-    first.do_initialize()
-    first.run()
-    first.do_run()
+    if initial:
+        first = create_event(frame, initial)
+        # NOTE: this double initialize is necessary to set appropriately at both the
+        # Event level and at the PlayVideo level. It's a hack to create an Event that
+        # bypasses initialization via schedule, but retains the lifecycle etc.
+        first.initialize()
+        first.do_initialize()
+        first.run()
+        first.do_run()
 
-    events_list.append(first)
-    logging.info("Initial video configured: " + initial["name"] + ". Plays until interrupted..")
+        events_list.append(first)
+        logging.info("Initial video configured: " + initial["name"] + ". Plays until interrupted..")
 
 def tick(events):
     event_logging.info("Tick")
