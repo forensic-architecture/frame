@@ -13,57 +13,73 @@ from queue import Queue
 
 from PyQt5.QtCore import Qt, QUrl, QRect, QTimer
 from PyQt5.QtGui import QIcon, QColor, QPalette
-from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QDialog, QFileDialog,
-                             QHBoxLayout, QLabel, QMainWindow, QToolBar, QVBoxLayout, QWidget, QPushButton, QStackedWidget)
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QDesktopWidget,
+    QDialog,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QToolBar,
+    QVBoxLayout,
+    QWidget,
+    QPushButton,
+    QStackedWidget,
+)
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaPlaylist, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 
-app_logging = logging.getLogger('frame')
-event_logging = logging.getLogger('frame.event')
+app_logging = logging.getLogger("frame")
+event_logging = logging.getLogger("frame.event")
+
 
 def string_to_job(schedule_str):
-    schedule_str = 'schedule.' + str(schedule_str) + ''
+    schedule_str = "schedule." + str(schedule_str) + ""
     try:
         return eval(schedule_str)
     except Exception:
         import traceback
-        logging.error('Error while evaluating schedule string: ' + schedule_str)
+
+        logging.error("Error while evaluating schedule string: " + schedule_str)
         logging.error(traceback.format_exc())
         return None
+
 
 class Event:
     def __init__(self, settings):
         self.__init_logging__(settings)
 
-        self.name = settings.get('name')
+        self.name = settings.get("name")
         self.logging.debug(("Creating event %s: " % self.name) + str(settings))
 
-        self.tags = settings.get('tags', [])
-        self.type = settings.get('type')
-        self.schedule_string = settings.get('schedule')
-        self.job = string_to_job(settings.get('schedule'))
-        self.cancel_on_error = settings.get('cancel_on_error', False)
+        self.tags = settings.get("tags", [])
+        self.type = settings.get("type")
+        self.schedule_string = settings.get("schedule")
+        self.job = string_to_job(settings.get("schedule"))
+        self.cancel_on_error = settings.get("cancel_on_error", False)
 
         if self.job:
             if self.tags:
                 self.job.tags(*self.tags)
             self.job.do(self.run)
 
-        self.__state = 'uninitialized'
+        self.__state = "uninitialized"
 
     def __init_logging__(self, settings):
-        self.logging = logging.getLogger('frame.event.%s' % str(settings.get('name')))
+        self.logging = logging.getLogger("frame.event.%s" % str(settings.get("name")))
 
     def protect(self, func, *args, **kwargs):
         try:
-            self.logging.debug("Running '%s.%s()'" % (
-                self.__class__.__name__,
-                func.__name__
-            ))
+            self.logging.debug(
+                "Running '%s.%s()'" % (self.__class__.__name__, func.__name__)
+            )
             func()
             return True
         except Exception:
             import traceback
+
             self.logging.error(traceback.format_exc())
             if self.cancel_on_error:
                 self.cancel()
@@ -75,42 +91,42 @@ class Event:
 
     @state.setter
     def state(self, value):
-        if (self.__state != value):
-            self.logging.debug('Changed from %s -> %s' % (self.__state, value))
+        if self.__state != value:
+            self.logging.debug("Changed from %s -> %s" % (self.__state, value))
             self.__state = value
 
     def initialize(self):
-        if self.state == 'uninitialized':
+        if self.state == "uninitialized":
             if self.protect(self.do_initialize):
-                self.state = 'initialized'
-        elif self.state == 'playing':
+                self.state = "initialized"
+        elif self.state == "playing":
             self.stop()
 
     def run(self):
-        if self.state == 'uninitialized':
+        if self.state == "uninitialized":
             self.initialize()
-        if self.state == 'running':
+        if self.state == "running":
             self.stop()
-        if self.state == 'initialized':
+        if self.state == "initialized":
             if self.protect(self.do_run):
-                self.state = 'running'
+                self.state = "running"
 
     def stop(self):
-        if self.state == 'running':
+        if self.state == "running":
             if self.protect(self.do_stop):
-                self.state = 'initialized'
+                self.state = "initialized"
 
     def reset(self):
         self.stop()
         if self.protect(self.do_reset):
-            self.state = 'uninitialized'
+            self.state = "uninitialized"
 
     def cancel(self):
         self.reset()
-        self.state = 'cancelled'
+        self.state = "cancelled"
 
     def tick(self):
-        if self.state == 'running':
+        if self.state == "running":
             self.do_tick()
 
     def do_initialize(self):
@@ -128,6 +144,7 @@ class Event:
     def do_tick(self):
         pass
 
+
 class DisplayEvent(Event):
     def __init__(self, frame, settings):
         super().__init__(settings)
@@ -137,11 +154,13 @@ class DisplayEvent(Event):
         self.widget.layout().setContentsMargins(0, 0, 0, 0)
         self.widget.layout().setSpacing(0)
 
-        self.fullscreen = settings.get('fullscreen', True)
-        self.geometry = settings.get('geometry')
+        self.fullscreen = settings.get("fullscreen", True)
+        self.geometry = settings.get("geometry")
 
-        if (self.geometry):
-            self.geometry = QRect(self.geometry[0], self.geometry[1], self.geometry[2], self.geometry[3])
+        if self.geometry:
+            self.geometry = QRect(
+                self.geometry[0], self.geometry[1], self.geometry[2], self.geometry[3]
+            )
 
     def add_widget(self, widget):
         if self.geometry:
@@ -164,6 +183,7 @@ class DisplayEvent(Event):
             if cur_widget is not self.widget:
                 self.stop()
 
+
 class Frame(QStackedWidget):
     def __init__(self, parent, settings):
         super().__init__(parent)
@@ -172,12 +192,13 @@ class Frame(QStackedWidget):
         self.addWidget(self.null)
 
         self.setAutoFillBackground(True)
-        self.background_color = settings.get('background_color', [0.0, 0.0, 0.0])
+        self.background_color = settings.get("background_color", [0.0, 0.0, 0.0])
         self.background_color = QColor(
             self.background_color[0] * 255,
             self.background_color[1] * 255,
             self.background_color[2] * 255,
-            255)
+            255,
+        )
         self.set_background_color(self.background_color)
 
         self.set_current()
@@ -212,21 +233,24 @@ class PlayVideo(DisplayEvent):
     def __init__(self, frame, settings):
         super().__init__(frame, settings)
 
-        self.url = QUrl(settings.get('url'))
-        self.start_time = settings.get('start', 0) * 1000
-        self.duration = settings.get('duration')
-        self.loop = settings.get('loop', True)
-        self.volume = settings.get('volume', 100)
-        self.playback_rate = settings.get('playbackRate', 1.0)
+        self.url = QUrl(settings.get("url"))
+        self.start_time = settings.get("start", 0) * 1000
+        self.duration = settings.get("duration")
+        self.loop = settings.get("loop", True)
+        self.volume = settings.get("volume", 100)
+        self.playback_rate = settings.get("playbackRate", 1.0)
 
     def do_tick(self):
         if self.player:
-            self.logging.info("position: %s/%s status: %s error: %s" % (
-                self.player.position(),
-                self.player.duration(),
-                self.player.mediaStatus(),
-                self.player.errorString()
-            ))
+            self.logging.info(
+                "position: %s/%s status: %s error: %s"
+                % (
+                    self.player.position(),
+                    self.player.duration(),
+                    self.player.mediaStatus(),
+                    self.player.errorString(),
+                )
+            )
             if self.player.errorString():
                 self.logging.error(self.player.errorString())
                 self.cancel()
@@ -240,7 +264,9 @@ class PlayVideo(DisplayEvent):
         self.media = QMediaContent(self.url)
         self.playlist = QMediaPlaylist(self.video)
         self.playlist.addMedia(self.media)
-        self.playlist.setPlaybackMode(QMediaPlaylist.Loop if self.loop else QMediaPlaylist.Sequential)
+        self.playlist.setPlaybackMode(
+            QMediaPlaylist.Loop if self.loop else QMediaPlaylist.Sequential
+        )
 
         self.player = QMediaPlayer(self.widget)
         self.player.setVideoOutput(self.video)
@@ -265,34 +291,35 @@ class PlayVideo(DisplayEvent):
         self.player = None
         self.video = None
 
+
 def create_event(parent, settings):
-    event_types = {
-        'PlayVideo': PlayVideo
-    }
-    event_class = event_types.get(settings.get('type'))
+    event_types = {"PlayVideo": PlayVideo}
+    event_class = event_types.get(settings.get("type"))
     event = event_class(parent, settings)
     return event
 
+
 def load_events(path, events_list):
-    settings_file = open(path, 'r')
+    settings_file = open(path, "r")
 
     try:
         from yaml import Loader, Dumper
         import yaml
+
         settings = yaml.load(settings_file, Loader=Loader)
         logging.info("Loaded settings: " + str(settings))
     except ImportError:
         import traceback
+
         logging.error(traceback.format_exc())
         return
 
-    events = settings.get('events')
+    events = settings.get("events")
     frame = Frame(None, settings)
     for name, event in events.items():
-        event['name'] = name
-        events_list.append(
-            create_event(frame, event)
-        )
+        event["name"] = name
+        events_list.append(create_event(frame, event))
+
 
 def tick(events):
     event_logging.info("Tick")
@@ -300,9 +327,10 @@ def tick(events):
     for event in events:
         event.tick()
 
+
 def main():
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('settings_yaml', help='Path to a yaml file with settings')
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument("settings_yaml", help="Path to a yaml file with settings")
     args = parser.parse_args()
 
     logging.root.setLevel(logging.DEBUG)
@@ -329,5 +357,6 @@ def main():
 
     sys.exit(application.exec_())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
