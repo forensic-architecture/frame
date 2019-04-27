@@ -52,20 +52,23 @@ class Event:
         self.__init_logging__(settings)
 
         self.name = settings.get("name")
-        self.logging.debug(("Creating event %s: " % self.name) + str(settings))
+        self.logging.debug(("Creating event %s." % self.name))
 
         self.tags = settings.get("tags", [])
         self.type = settings.get("type")
         self.schedule_string = settings.get("schedule")
-        self.job = string_to_job(settings.get("schedule"))
         self.cancel_on_error = settings.get("cancel_on_error", False)
+        if not self.schedule_string:
+            self.__state = "initialized"
+        else:
+            self.job = string_to_job(settings.get("schedule"))
 
-        if self.job:
-            if self.tags:
-                self.job.tags(*self.tags)
-            self.job.do(self.run)
+            if self.job:
+                if self.tags:
+                    self.job.tags(*self.tags)
+                self.job.do(self.run)
 
-        self.__state = "uninitialized"
+            self.__state = "uninitialized"
 
     def __init_logging__(self, settings):
         self.logging = logging.getLogger("frame.event.%s" % str(settings.get("name")))
@@ -92,7 +95,7 @@ class Event:
     @state.setter
     def state(self, value):
         if self.__state != value:
-            self.logging.debug("Changed from %s -> %s" % (self.__state, value))
+            # self.logging.debug("Changed from %s -> %s" % (self.__state, value))
             self.__state = value
 
     def initialize(self):
@@ -307,19 +310,34 @@ def load_events(path, events_list):
         import yaml
 
         settings = yaml.load(settings_file, Loader=Loader)
-        logging.info("Loaded settings: " + str(settings))
+        # logging.info("Loaded settings: " + str(settings))
     except ImportError:
         import traceback
 
         logging.error(traceback.format_exc())
         return
 
-    events = settings.get("events")
     frame = Frame(None, settings)
+    events = settings.get("events")
+
     for name, event in events.items():
         event["name"] = name
-        events_list.append(create_event(frame, event))
+        e = create_event(frame, event)
+        e.initialize()
+        events_list.append(e)
 
+    initial = settings.get("initial")
+    first = create_event(frame, initial)
+    # NOTE: this double initialize is necessary to set appropriately at both the
+    # Event level and at the PlayVideo level. It's a hack to create an Event that
+    # bypasses initialization via schedule, but retains the lifecycle etc.
+    first.initialize()
+    first.do_initialize()
+    first.run()
+    first.do_run()
+
+    events_list.append(first)
+    logging.info("Initial video configured: " + initial["name"] + ". Plays until interrupted..")
 
 def tick(events):
     event_logging.info("Tick")
@@ -352,9 +370,6 @@ def main():
     timer = QTimer()
     timer.timeout.connect(lambda: tick(events))
     timer.start(1000)
-
-    for e in events:
-        e.initialize()
 
     sys.exit(application.exec_())
 
