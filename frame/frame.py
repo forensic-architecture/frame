@@ -345,6 +345,7 @@ def main():
     app = server.run_server(event_logging_queue, events)
 
     application = QApplication(sys.argv)
+    application.setOverrideCursor(Qt.BlankCursor)
 
     load_events(args.settings_yaml, events)
 
