@@ -338,7 +338,12 @@ def load_events(path, events_list):
         first.do_run()
 
         events_list.append(first)
-        logging.info("Initial video configured: " + initial["name"] + ". Plays until interrupted..")
+        logging.info(
+            "Initial video configured: "
+            + initial["name"]
+            + ". Plays until interrupted.."
+        )
+
 
 def tick(events):
     event_logging.info("Tick")
