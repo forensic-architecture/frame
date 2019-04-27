@@ -157,6 +157,13 @@ class DisplayEvent(Event):
     def do_stop(self):
         self.frame.pop(self.widget)
 
+    def tick(self):
+        super().tick()
+        if self.state == "running":
+            cur_widget = self.frame.currentWidget()
+            if cur_widget is not self.widget:
+                self.stop()
+
 class Frame(QStackedWidget):
     def __init__(self, parent, settings):
         super().__init__(parent)
@@ -199,6 +206,7 @@ class Frame(QStackedWidget):
 
     def set_current(self):
         self.setCurrentWidget(self.stack[-1])
+
 
 class PlayVideo(DisplayEvent):
     def __init__(self, frame, settings):
