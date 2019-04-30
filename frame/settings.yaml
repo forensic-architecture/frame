@@ -1,3 +1,7 @@
+initial:
+  name: Test
+  type: PlayVideo
+  url: file:///Users/fsc/Downloads/jsjsjs.mp4
 events:
   test_video:
     name: Test
