@@ -1,3 +1,14 @@
-whitney.yaml
+.DS_Store
 frame/__pycache__/
 frame/server/__pycache__/
+
+# build artefacts
+application/mac/logo.jpg
+application/mac/build
+application/mac/dist
+application/mac/.eggs
+
+# defaults
+frame/default.yaml
+videos/
+
