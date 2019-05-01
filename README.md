@@ -51,11 +51,11 @@ file.
 Create a file at frame/default.yaml. Frame will default to using this config if
 no settings.yaml is explicitly provided as an argument.
 
-Once this is created, inside the `pipenv shell` from the setup in the Develop
-section above
+Once this is created, you can build an application with that configuration
+embedded: 
 ```
-    pip install py2app
-    python application/mac/setup.py py2app
+    cd application/mac
+    pipenv run python application/mac/setup.py py2app
 ```
 
 The packaged application should now be in `application/Mac/dist/frame.app`.

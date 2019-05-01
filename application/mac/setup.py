@@ -9,7 +9,8 @@ from setuptools import setup
 
 APP = ["../../frame/frame.py"]
 DATA_FILES = ["../../frame/default.yaml"]
-OPTIONS = {"iconfile": "./icon.icns"}
+OPTIONS = {}
+# OPTIONS = {"iconfile": "./icon.icns"}
 
 setup(
     app=APP,

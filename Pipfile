@@ -11,6 +11,7 @@ PyQt5 = "==5.12.1"
 PyYAML = "==5.1"
 sip = "*"
 tornado = "*"
+py2app = "==0.19"
 
 [requires]
 python_version = "3.7"
