@@ -64,6 +64,13 @@ The packaged application should now be in `application/Mac/dist/frame.app`.
 If you are using a dedicated Mac for the exhibition, follow these steps to
 ensure that Frame plays your video smoothly.
 
+#### Allowing apps from unidentified developers
+Given the way that the dedicated Mac app is being built, other Macs treat it
+suspiciously. If the app doesn't run immediately on double-click, go to:
+* System Preferences -> Security
+* At the bottom of the panel, where it says 'Allow apps downloaded from', allow
+    the app as an exception. 
+
 #### Turning the computer on and off at night.
 * System Preferences -> Energy Saver -> Schedule..
 * Set to ‘Start up or wake’ at some time each day
