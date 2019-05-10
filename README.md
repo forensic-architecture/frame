@@ -55,7 +55,7 @@ Once this is created, you can build an application with that configuration
 embedded: 
 ```
     cd application/mac
-    pipenv run python application/mac/setup.py py2app
+    pipenv run python setup.py py2app
 ```
 
 The packaged application should now be in `application/Mac/dist/frame.app`.
