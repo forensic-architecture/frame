@@ -1,7 +1,8 @@
 import sys
 
 import pkg_resources
-import os.path
+import os
+import inspect
 import schedule
 import time
 import yaml
@@ -353,8 +354,14 @@ def tick(events):
 
 
 def main():
+    FILE_DIR = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument("settings_yaml", help="Path to a yaml file with settings")
+    parser.add_argument(
+        "settings_yaml",
+        nargs="?",
+        help="Path to a yaml file with settings",
+        default="{}/default.yaml".format(FILE_DIR),
+    )
     args = parser.parse_args()
 
     logging.root.setLevel(logging.DEBUG)

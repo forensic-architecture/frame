@@ -1,0 +1,17 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+schedule = "==0.6.0"
+PyQt5 = "==5.12.1"
+PyYAML = "==5.1"
+tornado = "*"
+py2app = "==0.19"
+SIP = "*"
+
+[requires]
+python_version = "3.7"
