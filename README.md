@@ -36,6 +36,15 @@ Automate video schedules with YAML.
     python frame/frame.py frame/default.yaml
 ```
 
+
+## Tests
+Tests need to be run from inside a pipenv shell, from the `frame` directory:
+```
+pipenv shell
+cd frame
+python -m pytest
+```
+
 ## Production 
 Frame is designed for automating schedules in exhibition or exhibition-like
 contexts. You can package a particular config as a standalone Mac application,

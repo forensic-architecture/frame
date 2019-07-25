@@ -1,6 +1,7 @@
 .DS_Store
 frame/__pycache__/
 frame/server/__pycache__/
+**/*.pyc
 
 # build artefacts
 application/mac/build

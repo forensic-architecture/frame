@@ -1,0 +1,22 @@
+initial:
+  name: whitney
+  type: PlayVideo
+  url: file:///videos/safariland.mov
+
+events:
+  first:
+    name: yakub_musa
+    type: PlayVideo
+    schedule: every().saturday.at("13:00")
+    url: file:///videos/yakub_musa.mp4
+  second:
+    name: yakub_musa
+    type: PlayVideo
+    schedule: every().saturday.at("15:00")
+    url: file:///videos/yakub_musa.mp4
+  second:
+    name: yakub_musa
+    type: PlayVideo
+    schedule: every().saturday.at("17:00")
+    url: file:///videos/yakub_musa.mp4
+
