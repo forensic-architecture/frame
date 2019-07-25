@@ -1,0 +1,197 @@
+initial:
+  name: whitney
+  type: PlayVideo
+  url: file:///videos/safariland.mov
+
+events:
+  saturday_1pm:
+    name: yakub_musa
+    type: PlayVideo
+    schedule: every().saturday.at("13:00")
+    url: file:///videos/yakub_musa.mp4
+
+  RESUME_saturday_1pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().saturday.at("13:31")
+    url: file:///videos/safariland.mov
+
+  saturday_5pm:
+    name: yakub_musa
+    type: PlayVideo
+    schedule: every().saturday.at("17:00")
+    url: file:///videos/yakub_musa.mp4
+
+  RESUME_saturday_5pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().saturday.at("17:31")
+    url: file:///videos/safariland.mov
+
+  saturday_9pm:
+    name: yakub_musa
+    type: PlayVideo
+    schedule: every().saturday.at("21:00")
+    url: file:///videos/yakub_musa.mp4
+
+  RESUME_saturday_9pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().saturday.at("21:31")
+    url: file:///videos/safariland.mov
+
+  sunday_1pm:
+    name: tahir_elci_2x
+    type: PlayVideo
+    schedule: every().sunday.at("13:00")
+    url: file:///videos/tahir_elci.mp4
+
+  RESUME_sunday_1pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().sunday.at("13:27")
+    url: file:///videos/safariland.mov
+
+  sunday_5pm:
+    name: tahir_elci
+    type: PlayVideo
+    schedule: every().sunday.at("17:00")
+    url: file:///videos/tahir_elci.mp4
+
+  RESUME_sunday_5pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().sunday.at("17:27")
+    url: file:///videos/safariland.mov
+
+  monday_1pm:
+    name: pavlos_fyssas
+    type: PlayVideo
+    schedule: every().monday.at("13:00")
+    url: file:///videos/pavlos_fyssas.mp4
+
+  RESUME_monday_1pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().monday.at("13:39")
+    url: file:///videos/safariland.mov
+
+  monday_5pm:
+    name: pavlos_fyssas
+    type: PlayVideo
+    schedule: every().monday.at("17:00")
+    url: file:///videos/pavlos_fyssas.mp4
+
+  RESUME_monday_5pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().monday.at("17:39")
+    url: file:///videos/safariland.mov
+
+  tuesday_1pm:
+    name: yakub_musa
+    type: PlayVideo
+    schedule: every().tuesday.at("13:00")
+    url: file:///videos/yakub_musa.mp4
+
+  RESUME_tuesday_1pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().tuesday.at("13:31")
+    url: file:///videos/safariland.mov
+
+  tuesday_5pm:
+    name: yakub_musa
+    type: PlayVideo
+    schedule: every().tuesday.at("17:00")
+    url: file:///videos/yakub_musa.mp4
+
+  RESUME_tuesday_5pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().tuesday.at("17:31")
+    url: file:///videos/safariland.mov
+
+  wednesday_1pm:
+    name: ayotzinapa_2x
+    type: PlayVideo
+    schedule: every().wednesday.at("13:00")
+    url: file:///videos/ayotzinapa.mp4
+
+  RESUME_wednesday_1pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().wednesday.at("13:19")
+    url: file:///videos/safariland.mov
+
+  wednesday_5pm:
+    name: ayotzinapa_2x
+    type: PlayVideo
+    schedule: every().wednesday.at("17:00")
+    url: file:///videos/ayotzinapa.mp4
+
+  RESUME_wednesday_5pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().wednesday.at("17:19")
+    url: file:///videos/safariland.mov
+
+  thursday_1pm:
+    name: nawara
+    type: PlayVideo
+    schedule: every().thursday.at("13:00")
+    url: file:///videos/nawara.mp4
+
+  RESUME_thursday_1pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().thursday.at("13:24")
+    url: file:///videos/safariland.mov
+
+  thursday_5pm:
+    name: nawara
+    type: PlayVideo
+    schedule: every().thursday.at("17:00")
+    url: file:///videos/nawara.mp4
+
+  RESUME_thursday_5pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().thursday.at("17:24")
+    url: file:///videos/safariland.mov
+
+  friday_1pm:
+    name: yozgat_3x
+    type: PlayVideo
+    schedule: every().friday.at("13:00")
+    url: file:///videos/yozgat.mp4
+
+  RESUME_friday_1pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().friday.at("13:30")
+    url: file:///videos/safariland.mov
+
+  friday_5pm:
+    name: yozgat
+    type: PlayVideo
+    schedule: every().friday.at("17:00")
+    url: file:///videos/yozgat.mp4
+
+  RESUME_friday_5pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().friday.at("17:30")
+    url: file:///videos/safariland.mov
+
+  friday_9pm:
+    name: yozgat
+    type: PlayVideo
+    schedule: every().friday.at("21:00")
+    url: file:///videos/yozgat.mp4
+
+  RESUME_friday_9pm:
+    name: whitney
+    type: PlayVideo
+    schedule: every().friday.at("21:30")
+    url: file:///videos/safariland.mov
