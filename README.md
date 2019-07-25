@@ -1,7 +1,7 @@
 # Frame
 Automate video schedules with YAML.
 
-## Run from command line 
+## Run from command line
 1. Install
 ```
     pip3 install git+https://github.com/scztt/frame
@@ -24,23 +24,27 @@ Automate video schedules with YAML.
 ## Develop
 1. Clone
 ```
-    git clone https://github.com/scztt/frame
+    git clone https://github.com/forensic-architecture/frame
 ```
 2. Create development environment through [pipenv](https://github.com/pypa/pipenv)
 ```
     cd frame
     pipenv shell
 ```
-3. Run in dev
+3. Install dependencies
 ```
-    python frame/frame.py frame/default.yaml
+    pipenv install
+```
+4. Run in dev
+```
+    python frame/frame.py frame/settings.yaml
 ```
 
-## Production 
+## Production
 Frame is designed for automating schedules in exhibition or exhibition-like
 contexts. You can package a particular config as a standalone Mac application,
 so that running the schedule in an exhibition context is as easy as
-double-clicking the icon on a dedicated Mac Mini, or equivalent. 
+double-clicking the icon on a dedicated Mac Mini, or equivalent.
 
 When Frame is packaged, installation becomes as simple as sending a folder with
 the videos that your config plays (ensuring that they are at the same absolute
@@ -52,7 +56,7 @@ Create a file at frame/default.yaml. Frame will default to using this config if
 no settings.yaml is explicitly provided as an argument.
 
 Once this is created, you can build an application with that configuration
-embedded: 
+embedded:
 ```
     cd application/mac
     pipenv run python setup.py py2app
@@ -69,7 +73,7 @@ Given the way that the dedicated Mac app is being built, other Macs treat it
 suspiciously. If the app doesn't run immediately on double-click, go to:
 * System Preferences -> Security
 * At the bottom of the panel, where it says 'Allow apps downloaded from', allow
-    the app as an exception. 
+    the app as an exception.
 
 #### Turning the computer on and off at night.
 * System Preferences -> Energy Saver -> Schedule..
@@ -84,6 +88,5 @@ Note that you will not be able to configure automatic login for a User if
 FileVault or some other encryption at rest is used on the computer.
 
 #### Startup Items
-Add the Frame app as a Login Item for the user with automatic login. 
-* Systems Preferences -> Users & Groups -> ‘+’, and add ‘Frame’. Make sure that you have no other startup items to ensure that the video plays. 
-
+Add the Frame app as a Login Item for the user with automatic login.
+* Systems Preferences -> Users & Groups -> ‘+’, and add ‘Frame’. Make sure that you have no other startup items to ensure that the video plays.
